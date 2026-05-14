@@ -3,5 +3,6 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="RPP/RPP.vcxproj" />
+  <Project Path="RPP/RPP.vcxproj" Id="3b010d10-4c8a-4bc7-8c4d-88237af4cf04" />
+  <Project Path="RPP_OMP/RPP_OMP.vcxproj" Id="d1cd32c5-1b08-40b0-b372-65438be82007" />
 </Solution>
