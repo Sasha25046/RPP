@@ -221,9 +221,6 @@ int main(int argc, char* argv[]) {
 
     ProcessInitialization(&pArray, &pProcData, &pResult, &Size, &RowNum, &pSendCounts, &pDispls);
 
-    if (Size <= 20) {
-        TestDistribution(pArray, pProcData, Size, RowNum);
-    }
 
     Start = MPI_Wtime();
 
@@ -239,10 +236,6 @@ int main(int argc, char* argv[]) {
     Duration = Finish - Start;
 
     if (ProcRank == 0) {
-        if (Size <= 20) {
-            printf("\n Result Array:\n");
-            PrintArray(pResult, Size);
-        }
         printf("\n Time of execution: %f sec\n", Duration);
 
         SaveArrayToFile(pResult, Size, "sorted_result_parallel.txt");

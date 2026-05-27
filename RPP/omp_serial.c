@@ -8,11 +8,6 @@
 #include <time.h>
 #include <omp.h>
 
-void DummyDataInitialization(int* pArray, int Size) {
-    for (int i = 0; i < Size; i++)
-        pArray[i] = Size - i;
-}
-
 void RandomDataInitialization(int* pArray, int Size) {
     srand((unsigned int)time(NULL));
     for (int i = 0; i < Size; i++)
@@ -153,19 +148,13 @@ int main() {
 
     ProcessInitialization(&pSerial, &pOMP, &Size, &NumThreads);
 
-    if (Size <= 20) {
-        printf("\nInitial array:\n");
-        PrintArray(pSerial, Size);
-    }
 
-    
     t1 = omp_get_wtime();
     MergeSortSerial(pSerial, Size);
     t2 = omp_get_wtime();
     double serialTime = t2 - t1;
     printf("\nSerial Merge Sort time : %f sec\n", serialTime);
 
- 
     omp_set_num_threads(NumThreads);
 
     t1 = omp_get_wtime();
@@ -180,10 +169,6 @@ int main() {
     double ompTime = t2 - t1;
     printf("OpenMP Merge Sort time : %f sec (threads = %d)\n", ompTime, NumThreads);
 
-    if (Size <= 20) {
-        printf("\nOMP result:\n");
-        PrintArray(pOMP, Size);
-    }
 
     printf("\nSpeedup (serial / OMP): %.2f\n", serialTime / ompTime);
 
