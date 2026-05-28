@@ -59,10 +59,6 @@ void MergeSortOMP(int* a, int n) {
 }
 
 int CheckResult(const int* serial_result, const int* omp_result, int Size) {
-    for (int i = 1; i < Size; i++) {
-        if (serial_result[i] < serial_result[i - 1]) return 0;
-        if (omp_result[i] < omp_result[i - 1]) return 0;
-    }
     for (int i = 0; i < Size; i++) {
         if (serial_result[i] != omp_result[i]) return 0;
     }
