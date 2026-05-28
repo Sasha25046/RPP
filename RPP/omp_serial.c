@@ -14,18 +14,6 @@ void RandomDataInitialization(int* pArray, int Size) {
         pArray[i] = rand() % 100000;
 }
 
-void PrintArray(const int* pArray, int Size) {
-    int show = (Size > 20) ? 10 : Size;
-    printf("  [");
-    for (int i = 0; i < show; i++)
-        printf("%d%s", pArray[i], (i < show - 1) ? ", " : "");
-    if (Size > 20) {
-        printf(", ..., ");
-        for (int i = Size - 10; i < Size; i++)
-            printf("%d%s", pArray[i], (i < Size - 1) ? ", " : "");
-    }
-    printf("]\n");
-}
 
 void Merge(int* a, int n, int m) {
     int* tmp = (int*)malloc(n * sizeof(int));
