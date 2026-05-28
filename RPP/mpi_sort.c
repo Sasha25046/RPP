@@ -113,22 +113,6 @@ void DataDistribution(int* pArray, int* pProcData, int* pSendCounts, int* pDispl
     MPI_Scatterv(pArray, pSendCounts, pDispls, MPI_INT, pProcData, RowNum, MPI_INT, 0, MPI_COMM_WORLD);
 }
 
-void TestDistribution(int* pArray, int* pProcData, int Size, int RowNum) {
-    if (ProcRank == 0) {
-        printf("Initial Array:\n");
-        PrintArray(pArray, Size);
-    }
-    MPI_Barrier(MPI_COMM_WORLD);
-
-    for (int i = 0; i < ProcNum; i++) {
-        if (ProcRank == i) {
-            printf("\nProcRank = %d, Local Size = %d\n", ProcRank, RowNum);
-            PrintArray(pProcData, RowNum);
-        }
-        MPI_Barrier(MPI_COMM_WORLD);
-    }
-}
-
 void ParallelMergePhase(int** ppProcData, int* pRowNum) {
     int step = 1;
     while (step < ProcNum) {
