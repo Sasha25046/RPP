@@ -14,48 +14,41 @@ void RandomDataInitialization(int* pArray, int Size) {
         pArray[i] = rand() % 100000;
 }
 
-
-void Merge(int* a, int n, int m) {
-    int* tmp = (int*)malloc(n * sizeof(int));
-    if (!tmp) {
-        printf("Error: Memory allocation failed in Merge.\n");
-        return;
-    }
+void Merge(int* a, int n, int m, int* tmp) {
     int i = 0, j = m, k = 0;
     while (i < m && j < n)
         tmp[k++] = (a[i] <= a[j]) ? a[i++] : a[j++];
     while (i < m) tmp[k++] = a[i++];
     while (j < n) tmp[k++] = a[j++];
     memcpy(a, tmp, n * sizeof(int));
-    free(tmp);
 }
 
-void MergeSortSerial(int* a, int n) {
+void MergeSortSerial(int* a, int n, int* tmp) {
     if (n < 2) return;
     int mid = n / 2;
-    MergeSortSerial(a, mid);
-    MergeSortSerial(a + mid, n - mid);
-    Merge(a, n, mid);
+    MergeSortSerial(a, mid, tmp);
+    MergeSortSerial(a + mid, n - mid, tmp + mid);
+    Merge(a, n, mid, tmp);
 }
 
-#define OMP_THRESHOLD 2000
-
-void MergeSortOMP(int* a, int n) {
+void MergeSortOMP(int* a, int n, int* tmp, int depth) {
     if (n < 2) return;
-    if (n < OMP_THRESHOLD) {
-        MergeSortSerial(a, n);
+
+    if (depth <= 0) {
+        MergeSortSerial(a, n, tmp);
         return;
     }
+
     int mid = n / 2;
 
-#pragma omp task shared(a) firstprivate(mid)
-    MergeSortOMP(a, mid);
+#pragma omp task shared(a, tmp) firstprivate(mid, depth)
+    MergeSortOMP(a, mid, tmp, depth - 1);
 
-#pragma omp task shared(a) firstprivate(mid, n)
-    MergeSortOMP(a + mid, n - mid);
+#pragma omp task shared(a, tmp) firstprivate(mid, n, depth)
+    MergeSortOMP(a + mid, n - mid, tmp + mid, depth - 1);
 
 #pragma omp taskwait
-    Merge(a, n, mid);
+    Merge(a, n, mid, tmp);
 }
 
 int CheckResult(const int* serial_result, const int* omp_result, int Size) {
@@ -132,27 +125,37 @@ int main() {
 
     ProcessInitialization(&pSerial, &pOMP, &Size, &NumThreads);
 
+    int* tmpSerial = (int*)malloc(Size * sizeof(int));
 
     t1 = omp_get_wtime();
-    MergeSortSerial(pSerial, Size);
+    MergeSortSerial(pSerial, Size, tmpSerial);
     t2 = omp_get_wtime();
     double serialTime = t2 - t1;
     printf("\nSerial Merge Sort time : %f sec\n", serialTime);
+    free(tmpSerial);
 
     omp_set_num_threads(NumThreads);
+
+    int* tmpOMP = (int*)malloc(Size * sizeof(int));
+
+    int maxDepth = 0;
+    int t = NumThreads;
+    while (t > 1) { maxDepth++; t /= 2; }
+    maxDepth += 1;
 
     t1 = omp_get_wtime();
 #pragma omp parallel
     {
 #pragma omp single
         {
-            MergeSortOMP(pOMP, Size);
+            MergeSortOMP(pOMP, Size, tmpOMP, maxDepth);
         }
     }
     t2 = omp_get_wtime();
     double ompTime = t2 - t1;
     printf("OpenMP Merge Sort time : %f sec (threads = %d)\n", ompTime, NumThreads);
 
+    free(tmpOMP);
 
     printf("\nSpeedup (serial / OMP): %.2f\n", serialTime / ompTime);
 
